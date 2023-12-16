@@ -1,0 +1,11 @@
+services:
+  dotnet:
+    image: devcontainer:dotnet
+    build:
+      context: .
+    entrypoint: tail -F /dev/null
+    ports:
+      - 5000:5000
+    user: developer
+    volumes:
+      - ../:/work

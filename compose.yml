@@ -1,0 +1,6 @@
+services:
+  webapi:
+    build:
+      context: .
+    ports:
+      - 5000:80

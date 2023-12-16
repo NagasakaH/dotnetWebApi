@@ -1,0 +1,19 @@
+{
+  "name": "dotnet Development",
+  "dockerComposeFile": "./compose.yml",
+  "service": "dotnet",
+  "workspaceFolder": "/work",
+  "remoteUser": "developer",
+  "customizations": {
+		"vscode": {"settings": {
+			"terminal.integrated.defaultProfile.linux": "bash"
+		}},
+    "extensions": [
+      "hediet.vscode-drawio",
+      "ms-dotnettools.csharp",
+      "EditorConfig.EditorConfig",
+      "esbenp.prettier-vscode",
+      "csharpier.csharpier-vscode"
+    ]
+  }
+}
