@@ -4,16 +4,30 @@
   "service": "dotnet",
   "workspaceFolder": "/work",
   "remoteUser": "developer",
+  "postStartCommand": "cd src && dotnet tool install csharpier && dotnet restore && dotnet ef database update",
   "customizations": {
-		"vscode": {"settings": {
-			"terminal.integrated.defaultProfile.linux": "bash"
-		}},
-    "extensions": [
-      "hediet.vscode-drawio",
-      "ms-dotnettools.csharp",
-      "EditorConfig.EditorConfig",
-      "esbenp.prettier-vscode",
-      "csharpier.csharpier-vscode"
-    ]
+    "vscode": {
+      "settings": {
+        "editor.defaultFormatter": "esbenp.prettier-vscode",
+        "terminal.integrated.defaultProfile.linux": "bash",
+        "editor.formatOnSaveMode": "modifications",
+        "csharpier.dev.customPath": "/home/developer/.dotnet/tools/",
+        "[csharp]": {
+          "editor.defaultFormatter": "csharpier.csharpier-vscode",
+          "editor.formatOnSaveMode": "file"
+        }
+      },
+      "extensions": [
+        "hediet.vscode-drawio",
+        "ms-dotnettools.csharp",
+        "EditorConfig.EditorConfig",
+        "esbenp.prettier-vscode",
+        "csharpier.csharpier-vscode",
+        "ms-dotnettools.csdevkit",
+        "ms-azuretools.vscode-docker",
+        "GitHub.copilot-chat",
+        "oderwat.indent-rainbow"
+      ]
+    }
   }
 }

@@ -1,0 +1,16 @@
+{
+    "recommendations": [
+        "hediet.vscode-drawio",
+        "csharpier.csharpier-vscode",
+        "ms-dotnettools.vscode-dotnet-runtime",
+        "ms-dotnettools.csharp",
+        "ms-dotnettools.csdevkit",
+        "ms-azuretools.vscode-docker",
+        "editorconfig.editorconfig",
+        "github.copilot",
+        "github.copilot-chat",
+        "ms-dotnettools.vscodeintellicode-csharp",
+        "esbenp.prettier-vscode",
+        "oderwat.indent-rainbow"
+    ]
+}

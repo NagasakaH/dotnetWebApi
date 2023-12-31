@@ -1,0 +1,10 @@
+{
+  "editor.formatOnSaveMode": "modifications",
+  "csharpier.dev.customPath": "/home/developer/.dotnet/tools/",
+  "[csharp]": {
+    "editor.defaultFormatter": "csharpier.csharpier-vscode",
+    "editor.formatOnSaveMode": "file"
+  },
+  "csharpier.enableDebugLogs": true,
+  "csharp.format.enable": false
+}
