@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -9,9 +10,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace WebApi.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240101082358_AddUniqueIndex")]
+    partial class AddUniqueIndex
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -33,13 +36,6 @@ namespace WebApi.Migrations
                     b.HasIndex("UsersUserId");
 
                     b.ToTable("RoleUser");
-
-                    b.HasData(
-                        new
-                        {
-                            RolesRoleId = 1,
-                            UsersUserId = 1
-                        });
                 });
 
             modelBuilder.Entity("WebApi.Models.Role", b =>
@@ -52,12 +48,9 @@ namespace WebApi.Migrations
 
                     b.Property<string>("RoleName")
                         .IsRequired()
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("RoleId");
-
-                    b.HasIndex("RoleName")
-                        .IsUnique();
 
                     b.ToTable("Roles");
 
@@ -101,7 +94,7 @@ namespace WebApi.Migrations
                         {
                             UserId = 1,
                             Email = "example@example.com",
-                            Password = "AQAAAAIAAYagAAAAEO0iS/baWKALrPB0vI/otoV8tvqitNPv66h03OzukgaIjd2jfaCuiBbAAXsaiGjWIA==",
+                            Password = "AQAAAAIAAYagAAAAEH+yYWTIdTFn8vDWN6b7AMXbPC1PqVmxX2qxAMc1Z72CLNVWfCU5zTIo6fyGQQa/Iw==",
                             UserName = "admin"
                         });
                 });

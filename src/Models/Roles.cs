@@ -1,7 +1,9 @@
 using System.ComponentModel.DataAnnotations;
+using Microsoft.EntityFrameworkCore;
 
 namespace WebApi.Models
 {
+  [Index(nameof(RoleName), IsUnique = true)]
   public class Role
   {
     [Key]

@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using WebApi.Models;
+using WebApi.Services;
 
 namespace WebApi.Controllers;
 
@@ -11,11 +12,17 @@ public class UserController : ControllerBase
 {
   private readonly ILogger<UserController> _logger;
   private readonly AppDbContext _context;
+  private readonly ITokenService _tokenService;
 
-  public UserController(ILogger<UserController> logger, AppDbContext context)
+  public UserController(
+    ILogger<UserController> logger,
+    AppDbContext context,
+    ITokenService tokenService
+  )
   {
     _logger = logger;
     _context = context;
+    _tokenService = tokenService;
   }
 
   [HttpPost]
@@ -34,14 +41,9 @@ public class UserController : ControllerBase
     public required string Password { get; set; }
   }
 
-  [HttpGet]
-  public async Task<ActionResult<String>> getUser()
-  {
-    return "test";
-  }
 
   [HttpPost("login")]
-  public async Task<ActionResult<User>> Login(LoginRequest request)
+  public async Task<ActionResult<string>> Login(LoginRequest request)
   {
     var user = await _context.Users.FirstOrDefaultAsync(u => u.UserName == request.UserName);
 
@@ -58,6 +60,6 @@ public class UserController : ControllerBase
       return Unauthorized();
     }
 
-    return user;
+    return _tokenService.GenerateToken(user);
   }
 }

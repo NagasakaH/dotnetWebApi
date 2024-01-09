@@ -1,5 +1,7 @@
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
+using Microsoft.OpenApi.Models;
 using WebApi.Models;
 
 public class AppDbContext : DbContext
@@ -16,7 +18,20 @@ public class AppDbContext : DbContext
 
   protected override void OnModelCreating(ModelBuilder modelBuilder)
   {
+    // Set Relations
     modelBuilder.Entity<User>().HasMany(e => e.Roles).WithMany(e => e.Users);
+    // Insert Seed Data
+    modelBuilder.Entity<Role>().HasData(new Role { RoleId = 1, RoleName = "Admin" });
+    User admin = new User
+    {
+      UserId = 1,
+      UserName = "admin",
+      Password = "",
+      Email = "example@example.com",
+    };
+    admin.Password = new PasswordHasher<User>().HashPassword(admin, "admin");
+    modelBuilder.Entity<User>().HasData(admin);
+    modelBuilder.Entity("RoleUser").HasData(new { UsersUserId = 1, RolesRoleId = 1 });
   }
 
   protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
