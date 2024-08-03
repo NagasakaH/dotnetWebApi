@@ -1,3 +1,4 @@
+using System;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -36,18 +37,28 @@ public class AppDbContext : DbContext
 
   protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
   {
-    string appSqlServer = _configuration.GetValue<String>("SQLServer") ?? "sqlserver";
-    string sqlServer = Environment.GetEnvironmentVariable("SQLServer") ?? appSqlServer;
-    string appPort = _configuration.GetValue<String>("Port") ?? "1433";
-    string port = Environment.GetEnvironmentVariable("Port") ?? appPort;
-    string appDatabase = _configuration.GetValue<String>("Database") ?? "database";
-    string database = Environment.GetEnvironmentVariable("Database") ?? appDatabase;
-    string appId = _configuration.GetValue<String>("Id") ?? "sa";
-    string id = Environment.GetEnvironmentVariable("Id") ?? appId;
-    string appPassword = _configuration.GetValue<String>("Password") ?? "Password123";
-    string password = Environment.GetEnvironmentVariable("MSSQL_SA_PASSWORD") ?? appPassword;
+    string host =
+      Environment.GetEnvironmentVariable("POSTGRES_HOST")
+      ?? _configuration.GetValue<String>("DatabaseHost")
+      ?? "postgres";
+    string port =
+      Environment.GetEnvironmentVariable("POSTGRES_PORT")
+      ?? _configuration.GetValue<String>("DatabasePort")
+      ?? "5432";
+    string database =
+      Environment.GetEnvironmentVariable("POSTGRES_DB")
+      ?? _configuration.GetValue<String>("Database")
+      ?? "test01";
+    string username =
+      Environment.GetEnvironmentVariable("POSTGRES_USER")
+      ?? _configuration.GetValue<String>("DatabaseUser")
+      ?? "test01";
+    string password =
+      Environment.GetEnvironmentVariable("POSTGRES_PASSWORD")
+      ?? _configuration.GetValue<String>("DatabasePassword")
+      ?? "test01";
     string connectionString =
-      $"Server=tcp:{sqlServer},{port};Database={database};User Id={id};Password={password};TrustServerCertificate=True;";
-    optionsBuilder.UseSqlServer(@connectionString);
+      $"Host={host};Database={database};Username={username};Password={password}";
+    optionsBuilder.UseNpgsql(@connectionString);
   }
 }

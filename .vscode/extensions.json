@@ -11,6 +11,7 @@
         "github.copilot-chat",
         "ms-dotnettools.vscodeintellicode-csharp",
         "esbenp.prettier-vscode",
-        "oderwat.indent-rainbow"
+        "oderwat.indent-rainbow",
+        "rangav.vscode-thunder-client"
     ]
 }

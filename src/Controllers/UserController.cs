@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -6,8 +7,9 @@ using WebApi.Services;
 
 namespace WebApi.Controllers;
 
+
 [ApiController]
-[Route("user")]
+[Route("users")]
 public class UserController : ControllerBase
 {
   private readonly ILogger<UserController> _logger;
@@ -25,6 +27,7 @@ public class UserController : ControllerBase
     _tokenService = tokenService;
   }
 
+  [Authorize]
   [HttpPost]
   public async Task<ActionResult<User>> PostUser(User user)
   {
@@ -42,6 +45,7 @@ public class UserController : ControllerBase
   }
 
 
+  [AllowAnonymous]
   [HttpPost("login")]
   public async Task<ActionResult<string>> Login(LoginRequest request)
   {
@@ -61,5 +65,31 @@ public class UserController : ControllerBase
     }
 
     return _tokenService.GenerateToken(user);
+  }
+
+  [Authorize]
+  [HttpGet("{id}")]
+  public async Task<ActionResult<User>> GetUser(long id)
+  {
+    // 必要に応じて制限をかける
+
+    var user = await _context.Users.FirstOrDefaultAsync(u => u.UserId == id);
+    if (user == null)
+    {
+      return NotFound();
+    }
+
+    return user;
+  }
+
+  [HttpPut("{id}")]
+  public async Task<ActionResult<User>> UpdateUser(long id)
+  {
+    var user = await _context.Users.FirstOrDefaultAsync(u => u.UserId == id);
+    if (user == null)
+    {
+      return NotFound();
+    }
+    return user;
   }
 }

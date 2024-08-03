@@ -4,7 +4,7 @@
   "service": "dotnet",
   "workspaceFolder": "/work",
   "remoteUser": "developer",
-  "postStartCommand": "cd src && dotnet tool install csharpier && dotnet restore && dotnet ef database update",
+  "postStartCommand": "cd src && dotnet restore && dotnet ef database update",
   "customizations": {
     "vscode": {
       "settings": {
@@ -22,11 +22,12 @@
         "ms-dotnettools.csharp",
         "EditorConfig.EditorConfig",
         "esbenp.prettier-vscode",
-        "csharpier.csharpier-vscode",
         "ms-dotnettools.csdevkit",
         "ms-azuretools.vscode-docker",
         "GitHub.copilot-chat",
-        "oderwat.indent-rainbow"
+        "oderwat.indent-rainbow",
+        "csharpier.csharpier-vscode",
+        "rangav.vscode-thunder-client"
       ]
     }
   }

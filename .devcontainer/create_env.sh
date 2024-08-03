@@ -1,2 +1,12 @@
 #!/bin/bash
 echo "UID=`id -u`" >.env
+cat <<EOF >>.env
+POSTGRES_USER=test01
+POSTGRES_PASSWORD=test01
+POSTGRES_DB=test01
+POSTGRES_PORT=5432
+POSTGRES_HOST=postgres
+JWT_SECRET=TX7TWzhNSBS6Hjf1BAHArx8V0NkH96G4eCyhHMXPrYjJy+kl9Z3xmVpzKrbt6cSR
+JWT_AUDIENCE=audience
+JWT_ISSUER=issuer
+EOF

@@ -1,6 +1,8 @@
 using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
 using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using WebApi.Models;
 
@@ -16,10 +18,7 @@ public class TokenService : ITokenService
   private readonly IConfiguration _configuration;
   private readonly ILogger<TokenService> _logger;
 
-  public TokenService(
-    IConfiguration configuration,
-    ILogger<TokenService> logger
-  )
+  public TokenService(IConfiguration configuration, ILogger<TokenService> logger)
   {
     _configuration = configuration;
     _logger = logger;
@@ -27,22 +26,33 @@ public class TokenService : ITokenService
 
   public class JwtOptions
   {
-    public required string[] Issuer { get; set; }
-    public required string[] Audience { get; set; }
-    public required string Key { get; set; }
+    public required string Issuer { get; set; }
+    public required string Audience { get; set; }
+    public required SymmetricSecurityKey Key { get; set; }
     public int ExpirationMinutes { get; set; }
   }
 
   public static JwtOptions GetJwtOptions(IConfiguration configuration)
   {
+    var key =
+      Environment.GetEnvironmentVariable("JWT_SECRET")
+      ?? configuration.GetValue<string>("JWTSecretKey")
+      ?? "TX7TWzhNSBS6Hjf1BAHArx8V0NkH96G4eCyhHMXPrYjJy+kl9Z3xmVpzKrbt6cSR";
+    var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(key));
     JwtOptions jwtOptions =
       configuration.GetValue<JwtOptions>("JwtOptions")
       ?? new JwtOptions()
       {
-        Issuer = new string[] { },
-        Audience = new string[] { },
-        Key = "TX7TWzhNSBS6Hjf1BAHArx8V0NkH96G4eCyhHMXPrYjJy+kl9Z3xmVpzKrbt6cSR",
-        ExpirationMinutes = 60
+        Issuer =
+          Environment.GetEnvironmentVariable("JWT_ISSUER")
+          ?? configuration.GetValue<string>("JWTIssuer")
+          ?? "issuer",
+        Audience =
+          Environment.GetEnvironmentVariable("JWT_AUDIENCE")
+          ?? configuration.GetValue<string>("JWTAudience")
+          ?? "audience",
+        ExpirationMinutes = 60,
+        Key = securityKey
       };
     return jwtOptions;
   }
@@ -62,12 +72,13 @@ public class TokenService : ITokenService
       {
         o.TokenValidationParameters = new TokenValidationParameters
         {
-          ValidIssuer = "http://localhost:5000",
-          ValidAudience = "http://localhost:5000",
-          ValidateIssuer = false,
-          ValidateAudience = false,
+          ValidIssuer = jwtOptions.Issuer,
+          ValidAudience = jwtOptions.Audience,
+          ValidateIssuer = true,
+          ValidateAudience = true,
+          ValidateIssuerSigningKey = true,
           ClockSkew = TimeSpan.Zero,
-          IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtOptions.Key))
+          IssuerSigningKey =jwtOptions.Key
         };
       });
     services.AddAuthorization();
@@ -76,8 +87,20 @@ public class TokenService : ITokenService
   public string GenerateToken(User user)
   {
     JwtOptions jwtOptions = GetJwtOptions(_configuration);
+    var credentials = new SigningCredentials(jwtOptions.Key, "HS256");
+    var claims = new[]
+    {
+      new Claim(JwtRegisteredClaimNames.Sub, user.UserName),
+      new Claim(JwtRegisteredClaimNames.Email, user.Email)
+    };
     JwtSecurityTokenHandler tokenHandler = new();
-    JwtSecurityToken jwtSecurityToken = tokenHandler.CreateJwtSecurityToken();
+    JwtSecurityToken jwtSecurityToken = new JwtSecurityToken(
+      issuer: jwtOptions.Issuer,
+      audience: jwtOptions.Audience,
+      claims: claims,
+      expires: DateTime.Now.AddMinutes(jwtOptions.ExpirationMinutes),
+      signingCredentials: credentials
+    );
     return tokenHandler.WriteToken(jwtSecurityToken);
   }
 }
