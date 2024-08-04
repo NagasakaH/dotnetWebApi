@@ -9,6 +9,6 @@ namespace WebApi.Models
     [Key]
     public int RoleId { get; set; }
     public required string RoleName { get; set; }
-    public List<User> Users { get; set; } = new();
+    public virtual List<User> Users { get; set; } = new();
   }
 }

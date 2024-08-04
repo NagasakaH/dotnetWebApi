@@ -1,12 +1,16 @@
+using System.Security.Claims;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using WebApi.Controllers;
+using WebApi.Helpers;
 using WebApi.Models;
 using WebApi.Services;
 
 namespace WebApi.Controllers;
-
 
 [ApiController]
 [Route("users")]
@@ -40,16 +44,29 @@ public class UserController : ControllerBase
 
   public class LoginRequest
   {
-    public required string UserName { get; set; }
+    public required string Username { get; set; }
     public required string Password { get; set; }
   }
 
+  public class UserResponse
+  {
+    public int UserId { get; set; }
+    public required string Username { get; set; }
+    public required string Email { get; set; }
+
+    public List<RoleController.RoleResponse> Roles { get; set; } = new();
+
+    public static implicit operator UserResponse(User user)
+    {
+      return GenericConverter.ConvertObject<UserResponse>(user);
+    }
+  }
 
   [AllowAnonymous]
   [HttpPost("login")]
   public async Task<ActionResult<string>> Login(LoginRequest request)
   {
-    var user = await _context.Users.FirstOrDefaultAsync(u => u.UserName == request.UserName);
+    var user = await _context.Users.FirstOrDefaultAsync(u => u.Username == request.Username);
 
     if (user == null)
     {
@@ -64,12 +81,36 @@ public class UserController : ControllerBase
       return Unauthorized();
     }
 
+    // クッキー発行
+    var claims = new List<Claim>
+    {
+      new Claim(ClaimTypes.Name, user.Username),
+      new Claim(ClaimTypes.Email, user.Email),
+      new Claim(ClaimTypes.NameIdentifier, user.UserId.ToString())
+    };
+    var claimsIdentity = new ClaimsIdentity(
+      claims,
+      CookieAuthenticationDefaults.AuthenticationScheme
+    );
+    await HttpContext.SignInAsync(
+      CookieAuthenticationDefaults.AuthenticationScheme,
+      new ClaimsPrincipal(claimsIdentity)
+    );
+
     return _tokenService.GenerateToken(user);
   }
 
+  [HttpPost("Logout")]
+  public async Task<IActionResult> Logout()
+  {
+    await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+    return Ok();
+  }
+
   [Authorize]
+  [Authorize(AuthenticationSchemes = CookieAuthenticationDefaults.AuthenticationScheme)]
   [HttpGet("{id}")]
-  public async Task<ActionResult<User>> GetUser(long id)
+  public async Task<ActionResult<UserResponse>> GetUser(long id)
   {
     // 必要に応じて制限をかける
 
@@ -78,18 +119,36 @@ public class UserController : ControllerBase
     {
       return NotFound();
     }
-
-    return user;
+    UserResponse response = user;
+    var userRoleAssociations = await _context
+      .UserRoleAssociations.Where(ur => ur.UserId == user.UserId)
+      .ToListAsync();
+    foreach (var userRoleAssociation in userRoleAssociations)
+    {
+      var role = await _context.Roles.FirstOrDefaultAsync(r =>
+        r.RoleId == userRoleAssociation.RoleId
+      );
+      if (role == null)
+      {
+        return NotFound();
+      }
+      RoleController.RoleResponse roleResponse = role;
+      response.Roles.Add(role);
+    }
+    return response;
   }
 
+  [Authorize]
+  [Authorize(AuthenticationSchemes = CookieAuthenticationDefaults.AuthenticationScheme)]
   [HttpPut("{id}")]
-  public async Task<ActionResult<User>> UpdateUser(long id)
+  public async Task<ActionResult<UserResponse>> UpdateUser(long id)
   {
     var user = await _context.Users.FirstOrDefaultAsync(u => u.UserId == id);
     if (user == null)
     {
       return NotFound();
     }
-    return user;
+    UserResponse response = user;
+    return response;
   }
 }

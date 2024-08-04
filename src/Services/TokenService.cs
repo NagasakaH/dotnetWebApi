@@ -78,8 +78,9 @@ public class TokenService : ITokenService
           ValidateAudience = true,
           ValidateIssuerSigningKey = true,
           ClockSkew = TimeSpan.Zero,
-          IssuerSigningKey =jwtOptions.Key
+          IssuerSigningKey = jwtOptions.Key
         };
+        o.SaveToken = true;
       });
     services.AddAuthorization();
   }
@@ -90,7 +91,8 @@ public class TokenService : ITokenService
     var credentials = new SigningCredentials(jwtOptions.Key, "HS256");
     var claims = new[]
     {
-      new Claim(JwtRegisteredClaimNames.Sub, user.UserName),
+      new Claim(JwtRegisteredClaimNames.Sub, user.UserId.ToString()),
+      new Claim(JwtRegisteredClaimNames.Name, user.Username),
       new Claim(JwtRegisteredClaimNames.Email, user.Email)
     };
     JwtSecurityTokenHandler tokenHandler = new();

@@ -6,7 +6,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace WebApi.Migrations
 {
     /// <inheritdoc />
-    public partial class InitialCreate : Migration
+    public partial class InitialUpdate : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -30,7 +30,7 @@ namespace WebApi.Migrations
                 {
                     UserId = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    UserName = table.Column<string>(type: "text", nullable: false),
+                    Username = table.Column<string>(type: "text", nullable: false),
                     Email = table.Column<string>(type: "text", nullable: false),
                     Password = table.Column<string>(type: "text", nullable: false)
                 },
@@ -40,24 +40,26 @@ namespace WebApi.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "RoleUser",
+                name: "UserRoleAssociations",
                 columns: table => new
                 {
-                    RolesRoleId = table.Column<int>(type: "integer", nullable: false),
-                    UsersUserId = table.Column<int>(type: "integer", nullable: false)
+                    UserRoleAssociationId = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    RoleId = table.Column<int>(type: "integer", nullable: false),
+                    UserId = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_RoleUser", x => new { x.RolesRoleId, x.UsersUserId });
+                    table.PrimaryKey("PK_UserRoleAssociations", x => x.UserRoleAssociationId);
                     table.ForeignKey(
-                        name: "FK_RoleUser_Roles_RolesRoleId",
-                        column: x => x.RolesRoleId,
+                        name: "FK_UserRoleAssociations_Roles_RoleId",
+                        column: x => x.RoleId,
                         principalTable: "Roles",
                         principalColumn: "RoleId",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_RoleUser_Users_UsersUserId",
-                        column: x => x.UsersUserId,
+                        name: "FK_UserRoleAssociations_Users_UserId",
+                        column: x => x.UserId,
                         principalTable: "Users",
                         principalColumn: "UserId",
                         onDelete: ReferentialAction.Cascade);
@@ -70,13 +72,13 @@ namespace WebApi.Migrations
 
             migrationBuilder.InsertData(
                 table: "Users",
-                columns: new[] { "UserId", "Email", "Password", "UserName" },
-                values: new object[] { 1, "example@example.com", "AQAAAAIAAYagAAAAEHCZ6V6+8RgYdLMo2OMVkuYfoinMrcQaKeEQjW2fWrFGmLn7s7v57woNQ6A3RzuxlQ==", "admin" });
+                columns: new[] { "UserId", "Email", "Password", "Username" },
+                values: new object[] { 1, "example@example.com", "AQAAAAIAAYagAAAAELMFbihx5/g9RW41g5pH82H3eaqWkF9K6E1fpeLqPnrctDvwMjO6rHE38JikHfMncQ==", "admin" });
 
             migrationBuilder.InsertData(
-                table: "RoleUser",
-                columns: new[] { "RolesRoleId", "UsersUserId" },
-                values: new object[] { 1, 1 });
+                table: "UserRoleAssociations",
+                columns: new[] { "UserRoleAssociationId", "RoleId", "UserId" },
+                values: new object[] { 1, 1, 1 });
 
             migrationBuilder.CreateIndex(
                 name: "IX_Roles_RoleName",
@@ -85,14 +87,20 @@ namespace WebApi.Migrations
                 unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "IX_RoleUser_UsersUserId",
-                table: "RoleUser",
-                column: "UsersUserId");
+                name: "IX_UserRoleAssociations_RoleId",
+                table: "UserRoleAssociations",
+                column: "RoleId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Users_UserName",
+                name: "IX_UserRoleAssociations_UserId_RoleId",
+                table: "UserRoleAssociations",
+                columns: new[] { "UserId", "RoleId" },
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Users_Username",
                 table: "Users",
-                column: "UserName",
+                column: "Username",
                 unique: true);
         }
 
@@ -100,7 +108,7 @@ namespace WebApi.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "RoleUser");
+                name: "UserRoleAssociations");
 
             migrationBuilder.DropTable(
                 name: "Roles");

@@ -10,8 +10,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace WebApi.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20240803151938_InitialCreate")]
-    partial class InitialCreate
+    [Migration("20240804133128_InitialUpdate")]
+    partial class InitialUpdate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -22,28 +22,6 @@ namespace WebApi.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
-
-            modelBuilder.Entity("RoleUser", b =>
-                {
-                    b.Property<int>("RolesRoleId")
-                        .HasColumnType("integer");
-
-                    b.Property<int>("UsersUserId")
-                        .HasColumnType("integer");
-
-                    b.HasKey("RolesRoleId", "UsersUserId");
-
-                    b.HasIndex("UsersUserId");
-
-                    b.ToTable("RoleUser");
-
-                    b.HasData(
-                        new
-                        {
-                            RolesRoleId = 1,
-                            UsersUserId = 1
-                        });
-                });
 
             modelBuilder.Entity("WebApi.Models.Role", b =>
                 {
@@ -88,13 +66,13 @@ namespace WebApi.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<string>("UserName")
+                    b.Property<string>("Username")
                         .IsRequired()
                         .HasColumnType("text");
 
                     b.HasKey("UserId");
 
-                    b.HasIndex("UserName")
+                    b.HasIndex("Username")
                         .IsUnique();
 
                     b.ToTable("Users");
@@ -104,22 +82,54 @@ namespace WebApi.Migrations
                         {
                             UserId = 1,
                             Email = "example@example.com",
-                            Password = "AQAAAAIAAYagAAAAEHCZ6V6+8RgYdLMo2OMVkuYfoinMrcQaKeEQjW2fWrFGmLn7s7v57woNQ6A3RzuxlQ==",
-                            UserName = "admin"
+                            Password = "AQAAAAIAAYagAAAAELMFbihx5/g9RW41g5pH82H3eaqWkF9K6E1fpeLqPnrctDvwMjO6rHE38JikHfMncQ==",
+                            Username = "admin"
                         });
                 });
 
-            modelBuilder.Entity("RoleUser", b =>
+            modelBuilder.Entity("WebApi.Models.UserRoleAssociation", b =>
+                {
+                    b.Property<int>("UserRoleAssociationId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("UserRoleAssociationId"));
+
+                    b.Property<int>("RoleId")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("integer");
+
+                    b.HasKey("UserRoleAssociationId");
+
+                    b.HasIndex("RoleId");
+
+                    b.HasIndex("UserId", "RoleId")
+                        .IsUnique();
+
+                    b.ToTable("UserRoleAssociations");
+
+                    b.HasData(
+                        new
+                        {
+                            UserRoleAssociationId = 1,
+                            RoleId = 1,
+                            UserId = 1
+                        });
+                });
+
+            modelBuilder.Entity("WebApi.Models.UserRoleAssociation", b =>
                 {
                     b.HasOne("WebApi.Models.Role", null)
                         .WithMany()
-                        .HasForeignKey("RolesRoleId")
+                        .HasForeignKey("RoleId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("WebApi.Models.User", null)
                         .WithMany()
-                        .HasForeignKey("UsersUserId")
+                        .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });

@@ -16,23 +16,41 @@ public class AppDbContext : DbContext
 
   public required DbSet<User> Users { get; set; }
   public required DbSet<Role> Roles { get; set; }
+  public required DbSet<UserRoleAssociation> UserRoleAssociations { get; set; }
 
   protected override void OnModelCreating(ModelBuilder modelBuilder)
   {
     // Set Relations
-    modelBuilder.Entity<User>().HasMany(e => e.Roles).WithMany(e => e.Users);
+    modelBuilder
+      .Entity<User>()
+      .HasMany(e => e.Roles)
+      .WithMany(e => e.Users)
+      .UsingEntity<UserRoleAssociation>();
+    modelBuilder
+      .Entity<UserRoleAssociation>()
+      .HasIndex(c => new { c.UserId, c.RoleId })
+      .IsUnique(true);
     // Insert Seed Data
     modelBuilder.Entity<Role>().HasData(new Role { RoleId = 1, RoleName = "Admin" });
     User admin = new User
     {
       UserId = 1,
-      UserName = "admin",
+      Username = "admin",
       Password = "",
       Email = "example@example.com",
     };
     admin.Password = new PasswordHasher<User>().HashPassword(admin, "admin");
     modelBuilder.Entity<User>().HasData(admin);
-    modelBuilder.Entity("RoleUser").HasData(new { UsersUserId = 1, RolesRoleId = 1 });
+    modelBuilder
+      .Entity<UserRoleAssociation>()
+      .HasData(
+        new
+        {
+          UserRoleAssociationId = 1,
+          UserId = 1,
+          RoleId = 1
+        }
+      );
   }
 
   protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
