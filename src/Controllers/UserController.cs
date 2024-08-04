@@ -100,7 +100,7 @@ public class UserController : ControllerBase
     return _tokenService.GenerateToken(user);
   }
 
-  [HttpPost("Logout")]
+  [HttpPost("logout")]
   public async Task<IActionResult> Logout()
   {
     await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
