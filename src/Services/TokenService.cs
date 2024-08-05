@@ -91,9 +91,9 @@ public class TokenService : ITokenService
     var credentials = new SigningCredentials(jwtOptions.Key, "HS256");
     var claims = new[]
     {
-      new Claim(JwtRegisteredClaimNames.Sub, user.UserId.ToString()),
       new Claim(JwtRegisteredClaimNames.Name, user.Username),
-      new Claim(JwtRegisteredClaimNames.Email, user.Email)
+      new Claim(JwtRegisteredClaimNames.Email, user.Email),
+      new Claim(JwtRegisteredClaimNames.NameId, user.UserId.ToString())
     };
     JwtSecurityTokenHandler tokenHandler = new();
     JwtSecurityToken jwtSecurityToken = new JwtSecurityToken(

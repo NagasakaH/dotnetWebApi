@@ -1,6 +1,8 @@
+using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -62,6 +64,20 @@ public class UserController : ControllerBase
     }
   }
 
+  private async Task<User?> getAuthorizedUser()
+  {
+    User? currentUser = null;
+    var userIdClaim = HttpContext.User.Claims.FirstOrDefault(c =>
+      c.Type == ClaimTypes.NameIdentifier || c.Type == JwtRegisteredClaimNames.NameId
+    );
+    if (userIdClaim != null)
+    {
+      var userId = int.Parse(userIdClaim.Value);
+      currentUser = await _context.Users.FirstOrDefaultAsync(u => u.UserId == userId);
+    }
+    return currentUser;
+  }
+
   [AllowAnonymous]
   [HttpPost("login")]
   public async Task<ActionResult<string>> Login(LoginRequest request)
@@ -107,12 +123,29 @@ public class UserController : ControllerBase
     return Ok();
   }
 
-  [Authorize]
+  [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+  [Authorize(AuthenticationSchemes = CookieAuthenticationDefaults.AuthenticationScheme)]
+  [HttpGet("me")]
+  public async Task<ActionResult<UserResponse>> GetMe()
+  {
+    User? currentUser = await getAuthorizedUser();
+    if(currentUser == null){
+      return Unauthorized();
+    }
+    return (UserResponse)currentUser;
+
+  }
+
+  [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
   [Authorize(AuthenticationSchemes = CookieAuthenticationDefaults.AuthenticationScheme)]
   [HttpGet("{id}")]
   public async Task<ActionResult<UserResponse>> GetUser(long id)
   {
-    // 必要に応じて制限をかける
+    // 現在のユーザーを取得して同一かどうか確認
+    User? currentUser = await getAuthorizedUser();
+    if(currentUser == null || currentUser.UserId != id){
+      return Unauthorized();
+    }
 
     var user = await _context.Users.FirstOrDefaultAsync(u => u.UserId == id);
     if (user == null)
